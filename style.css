@@ -1,0 +1,23 @@
+
+
+.title {
+  border: solid navy;
+  color: whitesmoke;
+  background-color: cadetblue;
+  font-family: sans-serif;
+}
+
+.individual-list{
+  margin: auto;
+  display: inline-block;
+  border: solid steelblue;
+  padding: 15px;
+}
+
+#submit-checks{
+  margin-top: 8px;
+}
+
+.list-item-done{
+  text-decoration: line-through;
+}
