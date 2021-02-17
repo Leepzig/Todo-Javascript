@@ -2,16 +2,12 @@
 ctr + k +c = comment multiple lines
 ctr + k + u = uncomment multiple lines
 TODO:
-
-
--make a difference between done and not done
-    -make a plus button that opens a text box to add a sub-item (maybe too advanced)
-
   -movie rating idea using idmb
 
   -Go back to timer and fix the disaply option use mustache
   -make it into a class
 DONE:
+-make a difference between done and not done
 -make it possible to press the enter key to add a new item
     + enter key now works but I had to use document, so if there are more than one notes it might click all the buttons
     + will probably need to give the buttons unique Ids
@@ -60,6 +56,7 @@ class Todo {
     var bones = this.htmlToElements(output);
     debug = output
     bones.querySelector('#item-button').addEventListener('click', this.addItem.bind(this))
+    bones.querySelector('#submit-checks').addEventListener('click', this.markDone.bind(this));
     this.enterKeySubmit(bones, '#item-input')
     this.element.appendChild(bones);
     this.renderItems()
@@ -97,7 +94,7 @@ class Todo {
    // document.querySelector('#list-item').addEventListener(this.markDone.bind(this))
   }
 
-//adds an item to the list and calls renderItems() and saveList() and set the text box to ""
+//adds an item to the list and calls renderItems() and saveList() and sets the text box to ""
     addItem() {
       var value = document.querySelector('#item-input').value;
       if (value !== "") {
@@ -109,18 +106,46 @@ class Todo {
         document.querySelector('#item-input').value = "";
       }
   }
-  //I don't think I need this function anymore
-  //is going to change the status doneKey of the object to true
-  removeDoneItem() {
-    for (var i = 0; i < this.itemsTodo.length; i++) {
-      if (this.itemsTodo[i].notdone === false) {
-        this.itemsDone.push(this.itemsTodo[i])
-        this.itemsTodo.splice(i, 1)
-      } 
+  //changes the notdone status to false and adds it to itemsTODO while removing it from itemsNOTDONE, lastly saves it to localstorage
+  removeDoneItem(objIndex) {
+    this.itemsTodo[objIndex].notdone = false 
+    this.itemsDone.push(this.itemsTodo[objIndex])
+    this.itemsTodo.splice(objIndex, 1)
+    this.saveList()
+  }
+
+  //loops through the items displayed to look for checked items, then matches the checked item with
+  //itemsTODO, when matched, executes removeDoneItem on the matched item, then rerenders the items without the one
+  //that was checked
+  markDone() {
+    var nodeList = document.querySelectorAll('.list-item')
+    for (var i = 0; i < nodeList.length; i++) {
+      if (nodeList[i].checked === true) {
+        for (var n = 0; n < this.itemsTodo.length; n++) {
+          if (nodeList[i].id === this.itemsTodo[n].id) {
+            this.removeDoneItem(n);
+            this.renderItems();
+          }
+        }
+      }
     }
   }
 
-  markDone(idSelector) {
+  //saves this.items to localStorage['this.name']
+  saveList() {
+    localStorage[this.name] = JSON.stringify(this.items);
+  }
+}
+
+//creates the list and then calls render bones
+var list = new Todo('list', '#tasks-lists')
+list.renderBones()
+
+
+/*
+
+original markDone if I could do it without looping through every todoitem
+markDone(idSelector) {
     var checkbox = document.getElementById(idSelector).checked
     if (checkbox.checked === true) {
       for (var i = 0; i < this.itemsTodo; i++) {
@@ -134,43 +159,22 @@ class Todo {
     }
   }
 
-  //saves this.items to localStorage['this.name']
-  saveList() {
-    localStorage[this.name] = JSON.stringify(this.items);
+
+
+
+
+    markDone() {
+    document.querySelectorAll('.list-item').forEach(function(el){
+      if (el.checked === true) {
+        console.log(this.itemsTodo)
+        //for (var i = 0; i < this.itemsTodo.length)
+        this.itemsTodo.forEach(function(obj, objIndex){
+          if (el.id === obj.id) {
+            this.removeDoneItem(objIndex)
+            this.renderItems()
+          }
+        })
+      }
+    })
   }
-}
-
-var list = new Todo('list', '#tasks-lists')
-list.renderBones()
-
-//how to save the status....
-
-/*
-var itemOne = {'note':'this is a task I have to do', 'status':'done'}
-var itemTwo = {'note':'this is another task I need to do', 'status':'notdone'}
-localStorage['todo'] = JSON.stringify([itemOne, itemTwo])
-var todo = JSON.parse(localStorage['todo'])
-
-{list:
-  {itemsTodo:[{},{}],
-  itemsDone:[{},{}]
-  }
-}
-list.itemsTodo[0].note
-
-  "items": [
-    { "name": "Moe" },
-    { "name": "Larry" },
-    { "name": "Curly" }
-  ]
-}
-
-
-for (var i = 0; i < items.length; i++) {
-  if (items[i].notdone === true) {
-    itemsTodo.push(items[i])
-  } else if (items[i].notdone === false) {
-    itemsDone.push(items[i])
-  }
-}
 */
